@@ -1,0 +1,75 @@
+[size=5][b]Expedition33FXCore - CPU Scheduling and Audio Fix for Older CPUs[/b][/size]
+
+[b]A small runtime mod that changes how Windows schedules Clair Obscur: Expedition 33's threads on your CPU, and gives the engine a bigger audio buffer to cut down the crackling and static.[/b]
+
+Expedition33FXCore is a native DLL that loads with the game. It doesn't change graphics settings, game files or saves. It is a port of my Windrose and Everwind mods (WindroseFXCore, EverwindFXCore) to Expedition 33 (Unreal Engine 5.4).
+
+[size=4][b]Measured results[/b][/size]
+Test PC: AMD FX-8350, Radeon RX 6600 8 GB, 32 GB DDR3, 1080p, all settings Epic, XeSS at native resolution, VSync on, 60 FPS limit. Frame times recorded with PresentMon. The mod switched between stock and modded scheduling every minute within one session, so both were measured in the same places, five times over.
+[list]
+[*][b]Average FPS, light area:[/b] 22.2 stock, [b]25.8[/b] with the mod (+16%)
+[*][b]Average FPS, heavy area:[/b] 20.7 stock, [b]23.0[/b] with the mod (+11%)
+[*][b]Stutters over 50 ms:[/b] 137 a minute stock, [b]40[/b] with the mod
+[*][b]Time the graphics card was the limit:[/b] 25% stock, [b]84%[/b] with the mod. The CPU stops holding the GPU back most of the time.
+[*][b]Audio dropouts (crackle/static), counted in the audio the game sends to Windows:[/b] about 25 a minute with the stock buffer, about 3 a minute with the mod's bigger buffer. The two sessions weren't in exactly the same areas, so take the exact number loosely. The build-up of static the game is known for didn't happen. Short glitches can still happen in heavy scenes.
+[/list]
+[b]Your results will differ.[/b] Newer CPUs have less to gain. Please post yours.
+
+[size=4][b]What the mod does[/b][/size]
+[list]
+[*][b]Topology-aware thread placement[/b]: GameThread, RenderThread and RHIThread each prefer their own AMD FX module or physical core, read from your CPU's real cache layout.
+[*][b]Background worker isolation[/b]: asset streaming, decompression and shader work are kept off those cores.
+[*][b]Audio protection[/b]: the audio mixer runs at time-critical priority on its own preferred core.
+[*][b]Audio buffer fix[/b] (on by default): raises the engine's audio buffer from 256 to 2048 frames x 4. Adds up to about 0.17 s of audio delay; parry timing still felt normal on the test PC.
+[*][b]Priority floors[/b]: frame threads run at Above Normal.
+[*][b]0.5 ms timer resolution[/b] and [b]power-throttling opt-out[/b].
+[/list]
+
+[size=4][b]Which CPUs[/b][/size]
+[list]
+[*][b]AMD FX-8xxx/9xxx:[/b] everything applies (this is what it was built on).
+[*][b]Intel Core i7 with Hyper-Threading, Ryzen:[/b] everything applies.
+[*][b]Intel 12th gen and newer:[/b] the frame threads are placed on P-cores.
+[*][b]Dual cores or 4-core CPUs without SMT:[/b] thread placement switches itself off. The timer, priority, power and audio fixes still apply.
+[/list]
+
+[size=4][b]Settings tested on the same PC[/b][/size]
+[list]
+[*][b]Frame generation isn't worth it at 20-25 real FPS.[/b] The generated frames smeared badly in testing.
+[*][b]XeSS at native resolution[/b] ran better than FSR 4 at native resolution (through OptiScaler) on an RX 6600.
+[/list]
+
+[size=4][b]Installation[/b][/size]
+[list=1]
+[*]In Steam, right-click Clair Obscur: Expedition 33, then Manage, then Browse local files.
+[*]Extract the zip into that folder. The files go into [b]Sandfall\Binaries\Win64\[/b], next to SandFall-Win64-Shipping.exe.
+[*]Launch the game through Steam as usual.
+[/list]
+Steam version only. The Game Pass / Microsoft Store version uses different folders and is not supported.
+
+[b]Check it's working:[/b] open [b]Sandfall\Binaries\Win64\Expedition33FXCore.log[/b] after launching. It lists your CPU layout, the audio buffer and the threads it tuned. If there's no log, the DLL didn't load. Please let me know in the comments.
+
+[size=4][b]Uninstall[/b][/size]
+[list=1]
+[*]Set [b]AudioBufferFix=0[/b] in Expedition33FXCore.ini and launch the game once, so your Engine.ini is restored.
+[*]Delete [b]version.dll[/b], [b]Expedition33FXCore.ini[/b], [b]Expedition33FXCore.log[/b] and [b]Expedition33FXCore.state[/b] from Sandfall\Binaries\Win64.
+[/list]
+
+[size=4][b]Configuration[/b][/size]
+Every fix can be switched on or off individually in [b]Expedition33FXCore.ini[/b]. Set [b]Enabled=0[/b] to turn the whole mod off without removing it. If the audio delay bothers you, try [b]AudioBufferFrames=1024[/b].
+
+[size=4][b]FAQ[/b][/size]
+[b]Safe?[/b] Expedition 33 is single-player with no anti-cheat. The DLL makes no network connections and never touches saves or game files. The only file outside its own that it writes is Engine.ini (audio buffer), with a backup and automatic restore.
+[b]Compatible with other mods?[/b] Yes, unless another mod also uses version.dll as its loader. It works alongside OptiScaler (dxgi.dll).
+[b]Game won't start after an update?[/b] Delete version.dll to rule it out, then post in the comments with the game version.
+
+[size=4][b]Open source[/b][/size]
+Full source (C, MIT license), build instructions and the measuring tools:
+[url=https://github.com/mcirish3/Expedition33FXCore]github.com/mcirish3/Expedition33FXCore[/url]
+The download contains one compiled file, version.dll, built from that source with Zig (clang), plus the .ini and text files. No scripts, no installers, no archives inside the archive.
+SHA-256 of version.dll: ae46f24a63d28d6b8b3aa9b05e67b667c401912bf59adba4f3a9b5c9699d9f09
+
+[size=4][b]Reporting results[/b][/size]
+Post your CPU, GPU and RAM, your Expedition33FXCore.log, and what changed for you: frame rate, stutters, audio.
+
+Created by Patrick McCoy, with Claude (Anthropic). The code was written with AI assistance and tested on my own PC.
