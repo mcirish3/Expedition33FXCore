@@ -70,8 +70,8 @@ It doesn't remove every glitch: short ones can still happen during heavy scenes.
 
 ## Install
 
-1. Download the latest zip from [Nexus Mods](https://www.nexusmods.com/clairobscurexpedition33), GameBanana or
-   [Releases](../../releases).
+1. Download the latest zip from [Nexus Mods](https://www.nexusmods.com/clairobscurexpedition33/mods/1013),
+   [GameBanana](https://gamebanana.com/mods/745680) or [Releases](../../releases).
 2. In Steam, right-click **Clair Obscur: Expedition 33 → Manage → Browse local files**.
 3. Extract the zip into that folder. The files land in `Sandfall\Binaries\Win64\`, next to
    `SandFall-Win64-Shipping.exe`:
